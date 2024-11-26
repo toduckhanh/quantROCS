@@ -1,0 +1,19 @@
+Package: quantROCS
+Type: Package
+Title: Quantile regression approach for covariate-specific ROC surface analysis 
+Version: 0.1.0
+Authors@R: 
+    person(given = "Duc-Khanh",
+           family = "To",
+           role = c("aut", "cre"),
+           email = "tdkhanh@hcmus.edu.vn",
+           comment = c(ORCID = "0000-0002-4641-0764"))
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+Depends: R(>= 3.3.0), stats, utils, graphics, quantreg
+LazyLoad: yes
+ByteCompile: yes
+RoxygenNote: 7.3.2
