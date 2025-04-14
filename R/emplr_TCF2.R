@@ -34,10 +34,10 @@ ci_tcf2 <- function(out_pred_tcf2, out_tcf2_boot, ci_level, n) {
   out_ci <- sapply(1:m, function(i){
     lwr <- uniroot(f = ci_ll_emp_fun, interval = c(0, cov_tcf2_est[i]),
                    theta_est = cov_tcf2_est[i], n = n, qc = qc,
-                   w_adj = out_tcf2_boot$w_cov_tcf2[i])$root
+                   w_adj = out_tcf2_boot$w_cov_tcf2[i], tol = 1e-8)$root
     upr <- uniroot(f = ci_ll_emp_fun, interval = c(cov_tcf2_est[i], 1),
                    theta_est = cov_tcf2_est[i], n = n, qc = qc,
-                   w_adj = out_tcf2_boot$w_cov_tcf2[i])$root
+                   w_adj = out_tcf2_boot$w_cov_tcf2[i], tol = 1e-8)$root
     return(c(lwr, upr))
   })
   res <- out_pred_tcf2
@@ -47,14 +47,12 @@ ci_tcf2 <- function(out_pred_tcf2, out_tcf2_boot, ci_level, n) {
   adj_tcf2_est <- out_pred_tcf2$theta_2_est_adj
   lwr_adj_tcf2 <- uniroot(f = ci_ll_emp_fun,
                           interval = c(0, adj_tcf2_est),
-                          theta_est = adj_tcf2_est, n = n,
-                          qc = qc,
-                          w_adj = out_tcf2_boot$w_adj_tcf2)$root
+                          theta_est = adj_tcf2_est, n = n, qc = qc,
+                          w_adj = out_tcf2_boot$w_adj_tcf2, tol = 1e-8)$root
   upr_adj_tcf2 <- uniroot(f = ci_ll_emp_fun,
                           interval = c(adj_tcf2_est, 1),
-                          theta_est = adj_tcf2_est, n = n,
-                          qc = qc,
-                          w_adj = out_tcf2_boot$w_adj_tcf2)$root
+                          theta_est = adj_tcf2_est, n = n, qc = qc,
+                          w_adj = out_tcf2_boot$w_adj_tcf2, tol = 1e-8)$root
   res$theta_2_est_adj <- c("estimate" = res$theta_2_est_adj,
                            "lwr" = lwr_adj_tcf2, "upr" = upr_adj_tcf2)
   return(res)
