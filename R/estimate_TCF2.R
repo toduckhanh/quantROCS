@@ -63,7 +63,8 @@ fit_rq13_boot <- function(out_fit_tcf2, theta_10, theta_30, B, bsmethod, ...) {
 
 #' @export
 fit_tcf2_boot <- function(out_fit_tcf2, out_predict_tcf2, theta_10, theta_30, B,
-                          method = c("mb", "np"), newdata, bsmethod, ...) {
+                          method = c("mb", "np"), type = c("mean", "median"),
+                          newdata, bsmethod, ...) {
   # mb = model-based; np = non-parametric
   method <- match.arg(method)
   data_2_mb <- out_fit_tcf2$fit_logis$data
@@ -134,14 +135,26 @@ fit_tcf2_boot <- function(out_fit_tcf2, out_predict_tcf2, theta_10, theta_30, B,
   out_boot$sd_theta_2_est_adj <- sd(out_boot$theta_2_est_adj_boot)
   theta_2_est_ls <- split(out_boot$theta_2_est_boot,
                           row(out_boot$theta_2_est_boot))
-  w_cov_tcf2 <- 1/colMeans(mapply(function(u, v) {
-    ll_emp_vec(n = n, theta_true = u, theta_est = v)
-  }, u = as.list(out_predict_tcf2$out_theta_2_est$theta_2_est),
-  v = theta_2_est_ls))
+  type <- match.arg(type)
+  w_cov_tcf2 <- switch (type,
+    mean = 1/colMeans(mapply(function(u, v) {
+      ll_emp_vec(n = n, theta_true = u, theta_est = v)
+    }, u = as.list(out_predict_tcf2$out_theta_2_est$theta_2_est),
+    v = theta_2_est_ls)),
+    median = 0.454/apply(mapply(function(u, v) {
+      ll_emp_vec(n = n, theta_true = u, theta_est = v)
+    }, u = as.list(out_predict_tcf2$out_theta_2_est$theta_2_est),
+    v = theta_2_est_ls), 2, median)
+  )
   out_boot$w_cov_tcf2 <- w_cov_tcf2
-  w_adj_tcf2 <- 1/mean(sapply(out_boot$theta_2_est_adj_boot, function (x){
-    ll_emp(n = n, theta_true = out_predict_tcf2$theta_2_est_adj, theta_est = x)
-  }))
+  w_adj_tcf2 <- switch (type,
+    mean = 1/mean(sapply(out_boot$theta_2_est_adj_boot, function (x){
+      ll_emp(n = n, theta_true = out_predict_tcf2$theta_2_est_adj, theta_est = x)
+    })),
+    median = 0.454/median(sapply(out_boot$theta_2_est_adj_boot, function (x){
+      ll_emp(n = n, theta_true = out_predict_tcf2$theta_2_est_adj, theta_est = x)
+    }))
+  )
   out_boot$w_adj_tcf2 <- w_adj_tcf2
   return(out_boot)
 }

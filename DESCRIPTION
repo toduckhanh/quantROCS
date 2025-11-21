@@ -16,4 +16,4 @@ LazyData: true
 Depends: R(>= 3.3.0), stats, utils, graphics, quantreg
 LazyLoad: yes
 ByteCompile: yes
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
