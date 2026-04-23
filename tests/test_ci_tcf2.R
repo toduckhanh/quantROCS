@@ -36,7 +36,7 @@ out_test_predict
 out_test_boot_mcmb <- fit_tcf2_boot(
   out_fit_tcf2 = out_test, out_predict_tcf2 = out_test_predict,
   theta_10 = 0.3, theta_30 = 0.3, B = 200, method = "np",
-  newdata = data.frame(z = x_eval), bsmethod = "mcmb"
+  newdata = data.frame(z = x_eval), bsmethod = "mcmb", type = "mean"
 )
 out_test_boot_mcmb
 

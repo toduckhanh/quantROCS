@@ -63,7 +63,8 @@ fit_rq13_boot <- function(out_fit_tcf2, theta_10, theta_30, B, bsmethod, ...) {
 
 #' @export
 fit_tcf2_boot <- function(out_fit_tcf2, out_predict_tcf2, theta_10, theta_30, B,
-                          method = c("mb", "np"), type = c("mean", "median"),
+                          method = c("mb", "np"),
+                          type = c("mean", "median", "variance"),
                           newdata, bsmethod, ...) {
   # mb = model-based; np = non-parametric
   method <- match.arg(method)
@@ -135,25 +136,29 @@ fit_tcf2_boot <- function(out_fit_tcf2, out_predict_tcf2, theta_10, theta_30, B,
   out_boot$sd_theta_2_est_adj <- sd(out_boot$theta_2_est_adj_boot)
   theta_2_est_ls <- split(out_boot$theta_2_est_boot,
                           row(out_boot$theta_2_est_boot))
+  theta_2_est <- out_predict_tcf2$out_theta_2_est$theta_2_est
   type <- match.arg(type)
   w_cov_tcf2 <- switch (type,
     mean = 1/colMeans(mapply(function(u, v) {
       ll_emp_vec(n = n, theta_true = u, theta_est = v)
-    }, u = as.list(out_predict_tcf2$out_theta_2_est$theta_2_est),
-    v = theta_2_est_ls)),
-    median = 0.454/apply(mapply(function(u, v) {
+    }, u = as.list(theta_2_est), v = theta_2_est_ls)),
+    median = qchisq(0.5, 1)/apply(mapply(function(u, v) {
       ll_emp_vec(n = n, theta_true = u, theta_est = v)
-    }, u = as.list(out_predict_tcf2$out_theta_2_est$theta_2_est),
-    v = theta_2_est_ls), 2, median)
+    }, u = as.list(theta_2_est), v = theta_2_est_ls), 2, median),
+    variance = theta_2_est*(1 - theta_2_est)/(n*out_boot$sd_theta_2_est^2)
   )
   out_boot$w_cov_tcf2 <- w_cov_tcf2
+  theta_2_adj_est <- out_predict_tcf2$theta_2_est_adj
   w_adj_tcf2 <- switch (type,
     mean = 1/mean(sapply(out_boot$theta_2_est_adj_boot, function (x){
-      ll_emp(n = n, theta_true = out_predict_tcf2$theta_2_est_adj, theta_est = x)
+      ll_emp(n = n, theta_true = theta_2_adj_est,
+             theta_est = x)
     })),
-    median = 0.454/median(sapply(out_boot$theta_2_est_adj_boot, function (x){
-      ll_emp(n = n, theta_true = out_predict_tcf2$theta_2_est_adj, theta_est = x)
-    }))
+    median = qchisq(0.5, 1)/median(sapply(out_boot$theta_2_est_adj_boot, function (x){
+      ll_emp(n = n, theta_true = theta_2_adj_est,
+             theta_est = x)
+    })),
+    variance = theta_2_adj_est*(1 - theta_2_adj_est)/(n*out_boot$sd_theta_2_est_adj^2)
   )
   out_boot$w_adj_tcf2 <- w_adj_tcf2
   return(out_boot)
